@@ -1,0 +1,27 @@
+Sep 19 23:04:30 orion kernel: BERT: Error records from previous boot:
+Sep 19 23:04:30 orion kernel: [Hardware Error]: event severity: fatal
+Sep 19 23:04:30 orion kernel: [Hardware Error]:  Error 0, type: fatal
+Sep 19 23:04:30 orion kernel: [Hardware Error]:  fru_text: Locator: P0MC0
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   section_type: memory error
+Sep 19 23:04:30 orion kernel: [Hardware Error]:    error_status: Storage error in DRAM memory (0x0000000000040400)
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   node:0 card:0 module:0 
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   error_type: 15, physical memory map-out event
+Sep 19 23:04:30 orion kernel: [Hardware Error]:  Error 1, type: fatal
+Sep 19 23:04:30 orion kernel: [Hardware Error]:  fru_text: Locator: P0MB0
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   section_type: memory error
+Sep 19 23:04:30 orion kernel: [Hardware Error]:    error_status: Storage error in DRAM memory (0x0000000000040400)
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   node:0 card:5 module:0 
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   error_type: 15, physical memory map-out event
+Sep 19 23:04:30 orion kernel: [Hardware Error]:  Error 2, type: fatal
+Sep 19 23:04:30 orion kernel: [Hardware Error]:  fru_text: Locator: P0MG0
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   section_type: memory error
+Sep 19 23:04:30 orion kernel: [Hardware Error]:    error_status: Storage error in DRAM memory (0x0000000000040400)
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   node:0 card:6 module:0 
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   error_type: 15, physical memory map-out event
+Sep 19 23:04:30 orion kernel: [Hardware Error]:  Error 3, type: fatal
+Sep 19 23:04:30 orion kernel: [Hardware Error]:  fru_text: Locator: P0MF0
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   section_type: memory error
+Sep 19 23:04:30 orion kernel: [Hardware Error]:    error_status: Storage error in DRAM memory (0x0000000000040400)
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   node:0 card:11 module:0 
+Sep 19 23:04:30 orion kernel: [Hardware Error]:   error_type: 15, physical memory map-out event
+Sep 19 23:04:30 orion kernel: BERT: Total records found: 1

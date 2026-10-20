@@ -1,0 +1,66 @@
+Subject: Re: Technical Support 3186088 only ~377 GiB RAM [2b07a0]
+
+Dear Renato,
+
+Thank you - checking the BIOS was the right call, and further diagnostics
+have now clarified the fault. I don't think this is a missing or single
+dead module; it is an intermittent memory-training / hardware-stability
+problem.
+
+Key points:
+
+1. The detected RAM total changes on every boot. I have now observed the
+   BIOS report the full 512 GB at 6400 MHz, another boot report 256 GB, and
+   the current boot report ~377 GiB. All eight 64 GB Kingston DDR5 modules
+   are physically fitted.
+
+2. Crucially, the memory channels that fail to train are DIFFERENT each
+   boot. On one boot channels B, C, F and G were absent; on the current
+   boot only B and F are absent; on another boot all eight trained
+   correctly. A permanently failed module would drop the same slot every
+   time - mine does not. This points to a memory-training / contact
+   stability issue rather than one bad stick, and on an AMD Threadripper
+   platform that often involves CPU socket seating / pins (through which all
+   memory channels route) or marginal training of all eight channels at
+   6400 MT/s.
+
+3. The machine has also been resetting itself unprompted. On 13 June it ran
+   for several days, then spontaneously rebooted, ran for only 8 minutes,
+   and reset again. On the next boot the firmware reported an ACPI BERT
+   "Hardware Error" record - i.e. the firmware itself logged a hardware
+   fault during the crash.
+
+All of the above is observed at the firmware/POST level (BIOS total memory,
+SMBIOS table, and an ACPI firmware error record), independent of the
+operating system, so it is not a Linux issue.
+
+Given the spontaneous resets and the firmware-logged hardware error, I'd be
+grateful if this could be handled as a hardware service / RMA rather than a
+remote reseat suggestion. I would expect it to involve: reseating and
+inspecting the CPU and socket (bent/contaminated pins), reseating all eight
+DIMMs (and swapping modules between slots to see whether the fault follows a
+stick or a slot), a BIOS/AGESA update, and a memory stress test across
+repeated power-cycles to confirm stable training before return.
+
+For reference, I have attached the following evidence:
+
+  - bios-512gb.jpg  - BIOS Main page on a good boot, reporting the full
+    512 GB (DDR5) at 6400 MHz. Proves the machine sometimes detects all
+    the memory.
+  - dmidecode-256gb.txt  - the firmware/SMBIOS memory table on a 256 GB
+    boot, showing channels B, C, F and G as "No Module Installed".
+  - diagnostic-377gib.txt  - full diagnostic on the current ~377 GiB boot:
+    a DIFFERENT set of channels missing (only B and F this time), the ACPI
+    BERT firmware "Hardware Error" record from the crash, and the boot
+    history showing the spontaneous resets on 13 June.
+
+(BERT = the ACPI Boot Error Record Table: a hardware error the firmware
+itself recorded during the crash and reported on the next boot - i.e. a
+firmware-level hardware fault, not a software one.)
+
+I can supply the original-resolution photos and raw logs on request.
+
+Thank you very much for your help.
+
+Best regards,
+Boris

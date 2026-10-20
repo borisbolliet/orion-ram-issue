@@ -1,0 +1,38 @@
+Ticket: Technical Support 3186088 — only ~377 GiB RAM [2b07a0]
+PCS contact: Renato Gonzales, enquiries@pcspecialist.co.uk, 0333 011 7000
+
+=== From PCS (Renato Gonzales) ===
+Good morning.
+
+Thank you for contacting us and I hope you are well.
+
+I am sorry to hear you keep having the same issue. I will have to ask the
+same thing my colleague asked the last time. You mentioned the dmidecode
+shows only 256GB, but what happens when you enter the BIOS? Does it show
+the same amount, or does it show the full 512GB?
+
+Kind Regards
+Renato Gonzales
+PCS Time de Suporte
+
+=== From Boris (2026-06-03 21:44) ===
+Dear Team,
+
+I am getting back to you about this... The same problem keeps occurring.
+
+I have mentioned I have linux installed on this machine and you said you
+don't support linux, which I totally understand.
+
+However, this is extremely unlikely to be a software related issue. The
+command dmidecode shows the firmware/SMBIOS table itself reports only
+256gb...
+
+I have paid a very large amount for this machine, and expect to be able to
+use it at 512g ram, as sold...
+
+Please could you let me know what are the next steps? Maybe the
+motherboard is glitchy?
+
+Thank you so much!
+Best,
+Boris

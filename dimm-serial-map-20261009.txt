@@ -1,0 +1,8 @@
+P0 CHANNEL A   64 GB      serial=CA0A997B   rank=2 
+P0 CHANNEL B   64 GB      serial=A00A9902   rank=2 
+P0 CHANNEL C   64 GB      serial=9E0AA2C7   rank=2 
+P0 CHANNEL D   64 GB      serial=A80A9950   rank=2 
+P0 CHANNEL E   64 GB      serial=A00AA31B   rank=2 
+P0 CHANNEL F   64 GB      serial=9A0AA154   rank=2 
+P0 CHANNEL G   64 GB      serial=9D0AA163   rank=2 
+P0 CHANNEL H   64 GB      serial=AB0A997B   rank=2 

@@ -1,0 +1,60 @@
+# sudo dmidecode -t 17 | grep -E "Handle|Locator:|Size:|Part Number:|Manufacturer:|Speed:|Configured Memory Speed"
+# orion, 2026-06-08 (reproducible — identical across repeated runs)
+
+Handle 0x001D, DMI type 17, 100 bytes
+    Size: 64 GB
+    Locator: DIMM 0
+    Bank Locator: P0 CHANNEL A
+    Speed: 6400 MT/s
+    Manufacturer: Kingston
+    Part Number: 9965844-002.A01G
+    Configured Memory Speed: 6400 MT/s
+
+Handle 0x0020, DMI type 17, 100 bytes
+    Size: No Module Installed
+    Locator: DIMM 0
+    Bank Locator: P0 CHANNEL B
+
+Handle 0x0022, DMI type 17, 100 bytes
+    Size: No Module Installed
+    Locator: DIMM 0
+    Bank Locator: P0 CHANNEL C
+
+Handle 0x0024, DMI type 17, 100 bytes
+    Size: 64 GB
+    Locator: DIMM 0
+    Bank Locator: P0 CHANNEL D
+    Speed: 6400 MT/s
+    Manufacturer: Kingston
+    Part Number: 9965844-002.A01G
+    Configured Memory Speed: 6400 MT/s
+
+Handle 0x0028, DMI type 17, 100 bytes
+    Size: 64 GB
+    Locator: DIMM 0
+    Bank Locator: P0 CHANNEL E
+    Speed: 6400 MT/s
+    Manufacturer: Kingston
+    Part Number: 9965844-002.A01G
+    Configured Memory Speed: 6400 MT/s
+
+Handle 0x002B, DMI type 17, 100 bytes
+    Size: No Module Installed
+    Locator: DIMM 0
+    Bank Locator: P0 CHANNEL F
+
+Handle 0x002D, DMI type 17, 100 bytes
+    Size: No Module Installed
+    Locator: DIMM 0
+    Bank Locator: P0 CHANNEL G
+
+Handle 0x002F, DMI type 17, 100 bytes
+    Size: 64 GB
+    Locator: DIMM 0
+    Bank Locator: P0 CHANNEL H
+    Speed: 6400 MT/s
+    Manufacturer: Kingston
+    Part Number: 9965844-002.A01G
+    Configured Memory Speed: 6400 MT/s
+
+# Summary: populated A, D, E, H (4 × 64 GB = 256 GB); empty B, C, F, G.

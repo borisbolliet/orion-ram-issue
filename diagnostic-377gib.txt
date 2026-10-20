@@ -1,0 +1,63 @@
+############################################################
+# orion RAM diagnostic  —  Mon Jun 15 10:39:12 AM BST 2026
+# host: orion   kernel: 6.14.0-33-generic
+############################################################
+
+===== 1. What this boot sees =====
+MemTotal:       395301064 kB        # = 376.99 GiB (~405 GB)
+
+dmidecode -t 17 per channel:
+  CHANNEL A : 64 GB @ 6400 MT/s
+  CHANNEL B : No Module Installed
+  CHANNEL C : 64 GB @ 6400 MT/s
+  CHANNEL D : 64 GB @ 6400 MT/s
+  CHANNEL E : 64 GB @ 6400 MT/s
+  CHANNEL F : No Module Installed
+  CHANNEL G : 64 GB @ 6400 MT/s
+  CHANNEL H : 64 GB @ 6400 MT/s
+  => SMBIOS sees 6 modules populated (B, F missing this boot) = 384 GB
+
+===== 3. EDAC / MCE init (chip-select map this boot) =====
+BERT: [Hardware Error]: Skipped 1 error records     # <-- firmware logged a HW error from the crash
+MCE: In-kernel MCE decoding enabled.
+EDAC amd64: F1Ah detected (node 0).
+UMC chip selects with 64 GB trained: UMC0, UMC2, UMC3, UMC6, UMC8, UMC9, UMC11  (7 channels = 448 GB)
+(other UMCs: 0 MB)
+NOTE: SMBIOS=6 modules, EDAC=7 channels, MemTotal=377 GiB -> three sources disagree (instability).
+
+===== 4. Previous boot errors (boot -1) =====
+Only benign systemd/gdm/keyring failures; no clean shutdown reason -> abrupt reset.
+openipmi.service failed to start; gdm keyring unlock failures.
+
+===== 5. Boot history =====
+ -3  Sat 2026-06-06 14:18  -> Mon 2026-06-08 17:35
+ -2  Mon 2026-06-08 17:45  -> Sat 2026-06-13 20:23   (up ~5 days, then went down)
+ -1  Sat 2026-06-13 20:28  -> Sat 2026-06-13 20:36   (ran only 8 min -> reset again)
+  0  Sat 2026-06-13 20:40  -> Mon 2026-06-15 10:39   (current, still running)
+=> spontaneous double-reset on Jun 13 evening (~20:23, then 20:36).
+
+===== 6. rasdaemon =====
+ras-mc-ctl not installed.
+
+===== 7. EDAC sysfs counters =====
+mc0 ce_count: 0    ue_count: 0     # no corrected/uncorrectable errors logged this boot
+
+===== 8. last reboots =====
+reboot  Sat Jun 13 20:40  still running
+reboot  Sat Jun 13 20:28  (the 8-min boot)
+reboot  Mon Jun  8 17:45
+shutdown Mon Jun  8 17:35 - 17:45
+(prior boots back to April were long/stable)
+
+############################################################
+# INTERPRETATION
+# - RAM total varies every boot: 512 GB / 256 GB / 377 GiB.
+# - The DIMM channels that fail to train DIFFER per boot
+#   (earlier missing B,C,F,G; this boot missing B,F) -> not a single dead stick;
+#   points to memory-training instability / marginal contact, and on AMD TR
+#   classically a CPU socket-seating / LGA-pin issue (channels route via socket pins).
+# - Firmware logged a BERT hardware-error record; machine spontaneously reset
+#   twice on Jun 13. No active ECC errors this boot (fault is at training/reset, not steady-state).
+# - Needs hands-on service: reseat CPU + inspect socket pins, reseat all DIMMs,
+#   BIOS/AGESA update, stress test over repeated power-cycles. Push for engineer/RMA.
+############################################################

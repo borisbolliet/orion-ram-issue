@@ -1,0 +1,203 @@
+Subject: Re: Technical Support 3186088 only ~377 GiB RAM [2b07a0] — machine now
+         crashing; firmware has logged a FATAL memory hardware error
+
+Dear Renato / PCSpecialist Support Team,
+
+I wrote on 15 June with diagnostics for this ticket and have not had a
+response. In the meantime the fault has got materially worse, and the
+firmware has now recorded an unambiguous hardware error. I would like this
+escalated to a hardware service / RMA with a firm date.
+
+Summary of what has changed since June:
+
+  - The machine is now crashing and resetting itself without warning.
+  - On the most recent crash the firmware recorded a FATAL memory error -
+    specifically a DRAM parity error in the processor's memory controller.
+  - The machine has begun producing correctable ECC memory errors. In June
+    the error counters were zero; there have now been six in under 48 hours.
+
+Below is the detail. All of it is recorded by the firmware and the
+processor's own error registers, not by the operating system.
+
+
+1. THE CRASH
+
+On 17 September 2026 at 21:06:26 (BST) the machine stopped dead in the
+middle of normal work and reset itself, coming back up at 21:10:36. There
+was no operating-system shutdown, no software error, and no warning - the
+system log simply stops mid-entry. The same thing happened on 10 September
+at around 12:04, after which the machine stayed down until it was switched
+on by hand the following day.
+
+
+2. WHAT THE FIRMWARE RECORDED - THE KEY EVIDENCE
+
+On the boot following the 17 September crash, the firmware published an
+ACPI BERT record. BERT (Boot Error Record Table) is the mechanism by which
+the system firmware reports, on the next boot, a hardware error that
+occurred during the previous one. It is written by your firmware, not by
+Linux.
+
+That record is 92,292 bytes and contains 168 error entries, 71 of which are
+marked FATAL. Decoded, the critical entry is:
+
+    Section type : Platform Memory Error
+    Severity     : FATAL
+    Error type   : 8  (Parity error)
+    Location     : Node 0, Card 2, Module 0
+    MCA bank     : 0x15 (21)
+    MCA_IPID     : 0x0000009600250f00   -> hardware ID 0x96 = Unified
+                                           Memory Controller
+    MCA_STATUS   : 0xfea000000004080b   -> Valid, Overflow, Uncorrected,
+                                           Enabled, MiscV, AddrV, PCC
+
+The last flag is the important one. PCC means "Processor Context Corrupt":
+the processor determined its own state could no longer be trusted, which
+forces an immediate unrecoverable machine check and a hardware reset. That
+is precisely why the machine vanished mid-operation with nothing in the
+logs - there was no opportunity for software to record anything.
+
+I would like to pre-empt one likely suggestion: this was not a power cut or
+a mains dip. A loss of power cannot write a machine-check status register or
+populate an ACPI error record. The processor detected and logged this fault
+internally.
+
+Please also note the error TYPE: it is a PARITY error, not a multi-bit ECC
+error. Parity is checked on the command/address path between the memory
+controller and the modules. Failing memory chips produce ECC errors; a
+corrupted command/address path produces parity errors. This is a signal-
+integrity fault on the memory interface - which is the same physical failure
+mode as the intermittent training failures reported in June, now finally
+caught in the act.
+
+
+3. IT IS NOT A SINGLE FAULTY MODULE
+
+Three independent observations rule that out:
+
+  a) In the same instant, SIX different memory-controller instances logged
+     memory error sections (CPER "Card" indices 0, 2, 3, 5, 8, 9 - six of
+     the eight channels populated at the time). No single module can cause
+     six separate memory controllers to fail simultaneously. This is a
+     common-mode fault.
+
+  b) The modules themselves demonstrably work. Whenever the machine is shut
+     down and started again by hand - a true cold start - the firmware
+     trains all eight channels and reports the full complement (536,189,632
+     kB, i.e. ~503 GiB usable). The reduced totals only ever appear after
+     the machine has reset itself, when the firmware retrains from a warm
+     state. Every module is the correct Kingston part (9965844-002.A01G),
+     dual-rank, rated 6400 MT/s, and each is recognised correctly on a cold
+     boot.
+
+  c) The six correctable ECC errors are at six unrelated physical addresses.
+     A failing memory cell produces repeated errors at the SAME address.
+
+Accordingly I am NOT asking you to replace the memory modules. I do not
+believe that is the fault, and swapping them is likely to waste another
+round-trip.
+
+
+4. NEW: CORRECTABLE ECC ERRORS, CONFINED TO ONE CHANNEL
+
+In June I reported that the ECC error counters were clean (ce_count = 0).
+They are no longer. Since the 17 September reboot the machine has logged six
+correctable ECC errors, all of them on a single memory channel, across both
+of its ranks:
+
+    mc#0 csrow#0 channel#5 :  1 correctable error
+    mc#0 csrow#1 channel#5 :  5 correctable errors
+    (all other channels: 0)
+
+All six were reported by the processor as originating in the Unified Memory
+Controller. Correctable errors are silently fixed and do no immediate harm,
+but a channel that has gone from zero to six in 48 hours is degrading.
+
+Note that the fatal parity error above was on a DIFFERENT controller
+instance from the one now producing the correctable errors - so this is not
+localised to one channel either.
+
+
+5. CURRENT STATE
+
+The machine is presently running with only six of its eight modules trained
+(401,972,052 kB, ~376 GiB instead of ~503 GiB), because it has not been
+cold-started since the crash. It is in daily use by a research group, and it
+is not currently dependable: it has reset itself twice in the last ten days,
+losing work each time.
+
+
+6. WHAT I AM ASKING FOR
+
+A hands-on hardware service under warranty, comprising:
+
+  a) CPU and socket service. Every memory channel routes through the sTR5
+     socket pins, and a common-mode fault affecting six memory controllers
+     at once is exactly what marginal socket contact looks like. Please
+     reseat the processor and inspect the socket for bent, contaminated or
+     poorly-tensioned LGA pins.
+
+  b) BIOS / AGESA update. The machine is still on BIOS 1203, dated
+     18/07/2025, running AGESA ComboSP6PI 1.0.0.1a - the launch firmware for
+     this processor generation. ASUS released BIOS 1317 on 13/02/2026 with
+     ShimadaPeak PI 1.0.0.1e_012, described as improving system stability.
+     Four AGESA revisions of memory-training and stability work have not
+     been applied to this machine.
+
+  c) Validation in the configuration as sold. Please confirm stability with
+     all eight dual-rank 64 GB modules at 6400 MT/s under SUSTAINED LOAD and
+     across repeated power-cycles - not a single POST check or one memtest
+     pass. The fault is intermittent and load-related; a brief test will
+     pass and prove nothing.
+
+  d) Inspection of the motherboard memory slots and traces if (a) does not
+     resolve it.
+
+If your assessment is that eight dual-rank 64 GB modules cannot be run
+reliably at 6400 MT/s on this board, please say so explicitly in writing,
+because the machine was sold and invoiced on that specification.
+
+
+7. ON THE "WE DON'T SUPPORT LINUX" POINT
+
+Every item of evidence above originates below the operating system:
+
+  - the BIOS's own reported memory total,
+  - the SMBIOS/DMI table populated by the firmware at POST,
+  - an ACPI BERT record written by the firmware,
+  - the processor's own machine-check architecture registers.
+
+Linux cannot cause a module to be untrained at POST, cannot set the PCC bit
+in a machine-check register, and cannot fabricate an ACPI firmware error
+record. The operating system is only the means by which I am reading values
+your hardware and firmware produced.
+
+
+ATTACHMENTS
+
+  bert-decoded-20260917.txt
+      The firmware's own error record from the 17 September crash, fully
+      decoded: the FATAL parity error, the machine-check registers, and the
+      census of all 168 error entries.
+
+  bert-record-20260917.bin
+      The raw 92,292-byte ACPI BERT record, exactly as published by the
+      firmware, should your engineers wish to decode it independently.
+
+  orion-ram-diag-20260919-160836.txt
+      Full current diagnostic: per-channel module inventory, ECC counters
+      per channel, boot history showing the unexplained resets, and the
+      machine-check error log.
+
+  (From the June submission, still relevant: bios-512gb.jpg,
+   dmidecode-256gb.txt, diagnostic-377gib.txt.)
+
+Given that this ticket was opened in June, that I have had no reply since my
+15 June message, and that the machine is now actively crashing and losing
+work, I would be grateful for a substantive response and a proposed date
+this week.
+
+Thank you for your help.
+
+Best regards,
+Boris Bolliet

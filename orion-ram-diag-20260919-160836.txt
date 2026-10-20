@@ -1,0 +1,227 @@
+############################################################
+# orion RAM diagnostic  —  Sat Sep 19 04:08:36 PM BST 2026
+# host: orion   kernel: 6.14.0-33-generic
+############################################################
+
+===== 1. What this boot sees =====
+MemTotal:       395299788 kB
+
+	Size: 64 GB
+	Bank Locator: P0 CHANNEL A
+	Speed: 6400 MT/s
+	Configured Memory Speed: 6400 MT/s
+	Non-Volatile Size: None
+	Volatile Size: 64 GB
+	Cache Size: None
+	Logical Size: None
+	Size: 64 GB
+	Bank Locator: P0 CHANNEL B
+	Speed: 6400 MT/s
+	Configured Memory Speed: 6400 MT/s
+	Non-Volatile Size: None
+	Volatile Size: 64 GB
+	Cache Size: None
+	Logical Size: None
+	Size: 64 GB
+	Bank Locator: P0 CHANNEL C
+	Speed: 6400 MT/s
+	Configured Memory Speed: 6400 MT/s
+	Non-Volatile Size: None
+	Volatile Size: 64 GB
+	Cache Size: None
+	Logical Size: None
+	Size: 64 GB
+	Bank Locator: P0 CHANNEL D
+	Speed: 6400 MT/s
+	Configured Memory Speed: 6400 MT/s
+	Non-Volatile Size: None
+	Volatile Size: 64 GB
+	Cache Size: None
+	Logical Size: None
+	Size: 64 GB
+	Bank Locator: P0 CHANNEL E
+	Speed: 6400 MT/s
+	Configured Memory Speed: 6400 MT/s
+	Non-Volatile Size: None
+	Volatile Size: 64 GB
+	Cache Size: None
+	Logical Size: None
+	Size: No Module Installed
+	Bank Locator: P0 CHANNEL F
+	Size: No Module Installed
+	Bank Locator: P0 CHANNEL G
+	Size: 64 GB
+	Bank Locator: P0 CHANNEL H
+	Speed: 6400 MT/s
+	Configured Memory Speed: 6400 MT/s
+	Non-Volatile Size: None
+	Volatile Size: 64 GB
+	Cache Size: None
+	Logical Size: None
+
+===== 2. Per-channel summary (populated vs empty) =====
+  ->  	Size: 64 GB
+	Bank Locator: P0 CHANNEL A  ->  	Non-Volatile Size: None
+	Bank Locator: P0 CHANNEL A  ->  	Volatile Size: 64 GB
+	Bank Locator: P0 CHANNEL A  ->  	Cache Size: None
+	Bank Locator: P0 CHANNEL A  ->  	Logical Size: None
+	Bank Locator: P0 CHANNEL A  ->  	Size: 64 GB
+	Bank Locator: P0 CHANNEL B  ->  	Non-Volatile Size: None
+	Bank Locator: P0 CHANNEL B  ->  	Volatile Size: 64 GB
+	Bank Locator: P0 CHANNEL B  ->  	Cache Size: None
+	Bank Locator: P0 CHANNEL B  ->  	Logical Size: None
+	Bank Locator: P0 CHANNEL B  ->  	Size: 64 GB
+	Bank Locator: P0 CHANNEL C  ->  	Non-Volatile Size: None
+	Bank Locator: P0 CHANNEL C  ->  	Volatile Size: 64 GB
+	Bank Locator: P0 CHANNEL C  ->  	Cache Size: None
+	Bank Locator: P0 CHANNEL C  ->  	Logical Size: None
+	Bank Locator: P0 CHANNEL C  ->  	Size: 64 GB
+	Bank Locator: P0 CHANNEL D  ->  	Non-Volatile Size: None
+	Bank Locator: P0 CHANNEL D  ->  	Volatile Size: 64 GB
+	Bank Locator: P0 CHANNEL D  ->  	Cache Size: None
+	Bank Locator: P0 CHANNEL D  ->  	Logical Size: None
+	Bank Locator: P0 CHANNEL D  ->  	Size: 64 GB
+	Bank Locator: P0 CHANNEL E  ->  	Non-Volatile Size: None
+	Bank Locator: P0 CHANNEL E  ->  	Volatile Size: 64 GB
+	Bank Locator: P0 CHANNEL E  ->  	Cache Size: None
+	Bank Locator: P0 CHANNEL E  ->  	Logical Size: None
+	Bank Locator: P0 CHANNEL E  ->  	Size: No Module Installed
+	Bank Locator: P0 CHANNEL F  ->  	Size: No Module Installed
+	Bank Locator: P0 CHANNEL G  ->  	Size: 64 GB
+	Bank Locator: P0 CHANNEL H  ->  	Non-Volatile Size: None
+	Bank Locator: P0 CHANNEL H  ->  	Volatile Size: 64 GB
+	Bank Locator: P0 CHANNEL H  ->  	Cache Size: None
+	Bank Locator: P0 CHANNEL H  ->  	Logical Size: None
+
+===== 3. Memory / ECC errors (the smoking gun) =====
+[13440.405887] mce: [Hardware Error]: Machine check events logged
+[13440.405893] [Hardware Error]: Corrected error, no action required.
+[13440.405896] [Hardware Error]: CPU:2 (1a:8:1) MC22_STATUS[-|CE|MiscV|AddrV|-|-|SyndV|CECC|-|-|Scrub]: 0x9c2041000400011b
+[13440.405902] [Hardware Error]: Error Addr: 0x00000001e939c880
+[13440.405903] [Hardware Error]: PPIN: 0x02b0e2e87c4dc002
+[13440.405904] [Hardware Error]: IPID: 0x0000009600550f00, Syndrome: 0x040004000a801201
+[13440.405905] [Hardware Error]: FRU Text: Locator: P0MB0
+[13440.405906] [Hardware Error]: Unified Memory Controller Ext. Error Code: 0
+[13440.405931] EDAC MC0: 1 CE on mc#0csrow#1channel#5 (csrow:1 channel:5 page:0xbf75ab offset:0x280 grain:64 syndrome:0x400)
+[13440.405934] [Hardware Error]: cache level: L3/GEN, tx: GEN, mem-tx: RD
+[46863.547890] mce: [Hardware Error]: Machine check events logged
+[46863.547900] [Hardware Error]: Corrected error, no action required.
+[46863.547904] [Hardware Error]: CPU:2 (1a:8:1) MC22_STATUS[Over|CE|MiscV|AddrV|-|-|SyndV|CECC|-|-|-]: 0xdc2040000400011b
+[46863.547913] [Hardware Error]: Error Addr: 0x0000000ff0094280
+[46863.547915] [Hardware Error]: PPIN: 0x02b0e2e87c4dc002
+[46863.547916] [Hardware Error]: IPID: 0x0000009600550f00, Syndrome: 0x008000800a801201
+[46863.547918] [Hardware Error]: FRU Text: Locator: P0MB0
+[46863.547919] [Hardware Error]: Unified Memory Controller Ext. Error Code: 0
+[46863.547943] EDAC MC0: 1 CE Cannot decode normalized address on mc#0csrow#1channel#5 (csrow:1 channel:5 page:0x0 offset:0x0 grain:64 syndrome:0x80)
+[46863.547948] [Hardware Error]: cache level: L3/GEN, tx: GEN, mem-tx: RD
+[48174.258988] mce: [Hardware Error]: Machine check events logged
+[48174.258998] [Hardware Error]: Corrected error, no action required.
+[48174.259004] [Hardware Error]: CPU:2 (1a:8:1) MC22_STATUS[Over|CE|MiscV|AddrV|-|-|SyndV|CECC|-|-|-]: 0xdc2040000400011b
+[48174.259017] [Hardware Error]: Error Addr: 0x0000000073edf100
+[48174.259019] [Hardware Error]: PPIN: 0x02b0e2e87c4dc002
+[48174.259021] [Hardware Error]: IPID: 0x0000009600550f00, Syndrome: 0x308600800a800800
+[48174.259024] [Hardware Error]: FRU Text: Locator: P0MB0
+[48174.259026] [Hardware Error]: Unified Memory Controller Ext. Error Code: 0
+[48174.259053] EDAC MC0: 1 CE Cannot decode normalized address on mc#0csrow#0channel#5 (csrow:0 channel:5 page:0x0 offset:0x0 grain:64 syndrome:0x80)
+[48174.259058] [Hardware Error]: cache level: L3/GEN, tx: GEN, mem-tx: RD
+
+===== 4. Why it rebooted — previous boot's errors =====
+Sep 17 16:18:20 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:19:20 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:20:20 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:21:20 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:22:20 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:23:20 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:24:20 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:25:20 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:26:21 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:27:21 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:28:21 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:29:21 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:30:21 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:31:21 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:32:21 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:33:21 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:33:53 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:33:53 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 16:33:53 orion sshd[2917966]: error: connect_to 127.0.0.1 port 35623: failed.
+Sep 17 17:27:08 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 17:28:08 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 17:29:08 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 17:30:08 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 17:31:08 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 17:47:01 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 17:48:01 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 17:49:01 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 17:50:20 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 18:00:19 orion systemd[3926]: Failed to start snap.firmware-updater.firmware-notifier.service - Service for snap application firmware-updater.firmware-notifier.
+Sep 17 18:00:20 orion systemd[477585]: Failed to start snap.firmware-updater.firmware-notifier.service - Service for snap application firmware-updater.firmware-notifier.
+Sep 17 18:00:20 orion systemd[3929]: Failed to start snap.firmware-updater.firmware-notifier.service - Service for snap application firmware-updater.firmware-notifier.
+Sep 17 18:06:08 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 18:07:09 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 18:08:14 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 18:23:53 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 18:32:12 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 18:40:58 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 18:57:08 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:05:00 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:10:05 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:15:09 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:19:59 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:20:59 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:25:05 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:30:00 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:35:10 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:36:10 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:38:26 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:40:05 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:45:30 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:58:12 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 19:59:12 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 20:00:12 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 20:16:33 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 20:32:53 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 20:33:53 orion sshd[3223883]: error: connect_to 127.0.0.1 port 41617: failed.
+Sep 17 20:59:03 orion sshd[4055179]: error: connect_to 127.0.0.1 port 44513: failed.
+Sep 17 21:00:12 orion systemd[3926]: Failed to start snap.firmware-updater.firmware-notifier.service - Service for snap application firmware-updater.firmware-notifier.
+Sep 17 21:00:19 orion systemd[477585]: Failed to start snap.firmware-updater.firmware-notifier.service - Service for snap application firmware-updater.firmware-notifier.
+Sep 17 21:00:20 orion systemd[3929]: Failed to start snap.firmware-updater.firmware-notifier.service - Service for snap application firmware-updater.firmware-notifier.
+
+===== 5. Boot history (shows the unexpected restart) =====
+IDX BOOT ID                          FIRST ENTRY                 LAST ENTRY
+ -2 64431b5dc7ef486e94faaf7091ae4f0b Mon 2026-09-07 13:08:33 BST Thu 2026-09-10 12:04:06 BST
+ -1 7cedf75906854c6096a08520b9bbef48 Fri 2026-09-11 13:45:39 BST Thu 2026-09-17 21:06:26 BST
+  0 14bb78089b1e4a69980fdfc3491122e8 Thu 2026-09-17 21:10:36 BST Sat 2026-09-19 16:08:36 BST
+
+===== 6. ECC error counters (rasdaemon, if installed) =====
+No Memory errors.
+
+No PCIe AER errors.
+
+No Extlog errors.
+
+No MCE errors.
+
+
+===== 7. EDAC counters via sysfs (fallback ECC check) =====
+(ce_count = corrected errors, ue_count = uncorrectable -> these cause resets)
+/sys/devices/system/edac/mc/mc0/ce_count:6
+/sys/devices/system/edac/mc/mc0/ue_count:0
+
+===== 8. Last reboots / shutdowns =====
+reboot   system boot  6.14.0-33-generi Thu Sep 17 21:10   still running
+reboot   system boot  6.14.0-33-generi Fri Sep 11 13:45   still running
+reboot   system boot  6.14.0-33-generi Wed Aug 26 14:58   still running
+reboot   system boot  6.14.0-33-generi Tue Aug 25 19:10   still running
+reboot   system boot  6.14.0-33-generi Fri Aug 14 17:17   still running
+reboot   system boot  6.14.0-33-generi Fri Aug 14 16:41   still running
+shutdown system down  6.14.0-33-generi Fri Aug 14 16:37 - 16:41  (00:03)
+reboot   system boot  6.14.0-33-generi Tue Aug  4 10:30 - 16:37 (10+06:07)
+reboot   system boot  6.14.0-33-generi Mon Aug  3 16:09 - 16:37 (11+00:28)
+reboot   system boot  6.14.0-33-generi Sun Aug  2 11:25 - 16:37 (12+05:12)
+
+wtmp begins Sun Aug  2 00:50:02 2026
+
+############################################################
+# end of report
+############################################################

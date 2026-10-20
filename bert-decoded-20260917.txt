@@ -1,0 +1,285 @@
+############################################################
+# orion — ACPI BERT record decoded (crash of 2026-09-17 21:06:26 BST)
+# Firmware-generated hardware error record, read from
+#   /sys/firmware/acpi/tables/data/BERT   (92,292 bytes)
+# Present on the boot that followed the crash; absent on the previous boot.
+############################################################
+
+===== Full CPER decode (first 8 error data entries) =====
+Generic Error Status Block
+  block_status   : 0x00000000
+  data_length    : 92272 bytes
+  error_severity : 1 (FATAL)
+
+--- Error Data Entry 1 ---
+  section type : IA32/X64 Processor Error
+  severity     : 0 (Recoverable)
+  flags        : 0x01 (primary )
+  FRU text     : 'Perr S0:T000:B00'
+  data length  : 544 bytes  (revision 0x0300, timestamp raw 0x0000000000000000)
+  validation   : 0x207 -> 1 error-info struct(s), 2 context struct(s)
+  local APIC id: 0
+  CPUID eax    : 0x00b00f81 -> family 0x1a model 0x8 stepping 1
+
+  [Processor Error Info 1] Cache Check
+     valid bits : 0x11 (check_info=Y target=n requestor=n responder=n ip=Y)
+     check_info : 0x000000001c4d0077
+     decoded    : txn=Instruction, op=Generic error, level=4, UNCORRECTED=1, precise-ip=1, restartable-ip=0
+     instr ptr  : 0x000000004ff6ff00
+
+  [Context Info 1] type=1 (MSR Registers) size=128 msr_base=0xc0002001
+       MSR 0xc0002001 = 0xbc000800000c0135
+       MSR 0xc0002002 = 0x00000000671b7000
+       MSR 0xc0002003 = 0xd0140ffe00000000
+       MSR 0xc0002004 = 0x00000005000003ef
+       MSR 0xc0002005 = 0x000000b0002000a2
+       MSR 0xc0002006 = 0x0000000000000000
+       MSR 0xc0002007 = 0x0000000000000000
+       MSR 0xc0002008 = 0x0000000000000000
+       MSR 0xc0002009 = 0x0000000000000000
+       MSR 0xc000200a = 0x0000000000000000
+       MSR 0xc000200b = 0x0000000000000000
+       MSR 0xc000200c = 0x0000000000000000
+       MSR 0xc000200d = 0x0000000000000000
+       MSR 0xc000200e = 0x3a30532072726550
+       MSR 0xc000200f = 0x3030423a30303054
+       MSR 0xc0002010 = 0x0000000000000000
+
+  [Context Info 2] type=3 (64-bit x86 context) size=256 msr_base=0x0
+       0000000000000000000000000000000000701b67000000006a000000000000000000000000000000106d1d670000000000000000000000005d760c2a94d50400
+
+--- Error Data Entry 2 ---
+  section type : Platform Memory Error
+  severity     : 0 (Recoverable)
+  flags        : 0x01 (primary )
+  FRU text     : 'Perr S0:T000:B15'
+  data length  : 80 bytes  (revision 0x0300, timestamp raw 0x0000000000000000)
+
+--- Error Data Entry 3 ---
+  section type : IA32/X64 Processor Error
+  severity     : 0 (Recoverable)
+  flags        : 0x01 (primary )
+  FRU text     : 'Perr S0:T002:B00'
+  data length  : 544 bytes  (revision 0x0300, timestamp raw 0x0000000000000000)
+  validation   : 0x207 -> 1 error-info struct(s), 2 context struct(s)
+  local APIC id: 2
+  CPUID eax    : 0x00b00f81 -> family 0x1a model 0x8 stepping 1
+
+  [Processor Error Info 1] Cache Check
+     valid bits : 0x11 (check_info=Y target=n requestor=n responder=n ip=Y)
+     check_info : 0x000000001c4d0077
+     decoded    : txn=Instruction, op=Generic error, level=4, UNCORRECTED=1, precise-ip=1, restartable-ip=0
+     instr ptr  : 0x000000004ff6ff00
+
+  [Context Info 1] type=1 (MSR Registers) size=128 msr_base=0xc0002001
+       MSR 0xc0002001 = 0xbc000800000c0135
+       MSR 0xc0002002 = 0x00000000671fad00
+       MSR 0xc0002003 = 0xd0140ffe00000000
+       MSR 0xc0002004 = 0x00000005000003ef
+       MSR 0xc0002005 = 0x000000b0002002a2
+       MSR 0xc0002006 = 0x0000000000000000
+       MSR 0xc0002007 = 0x0000000000000000
+       MSR 0xc0002008 = 0x0000000000000000
+       MSR 0xc0002009 = 0x0000000000000000
+       MSR 0xc000200a = 0x0000000000000000
+       MSR 0xc000200b = 0x0000000000000000
+       MSR 0xc000200c = 0x0000000000000000
+       MSR 0xc000200d = 0x0000000000000000
+       MSR 0xc000200e = 0x3a30532072726550
+       MSR 0xc000200f = 0x3030423a32303054
+       MSR 0xc0002010 = 0x0000000000000000
+
+  [Context Info 2] type=3 (64-bit x86 context) size=256 msr_base=0x0
+       dc03f56700000000020000000000000000701b670000000018aef467000000000000000000000000a0ad1f670000000000d0ff5f000000000000000000000000
+
+--- Error Data Entry 4 ---
+  section type : IA32/X64 Processor Error
+  severity     : 0 (Recoverable)
+  flags        : 0x01 (primary )
+  FRU text     : 'Perr S0:T002:B01'
+  data length  : 544 bytes  (revision 0x0300, timestamp raw 0x0000000000000000)
+  validation   : 0x207 -> 1 error-info struct(s), 2 context struct(s)
+  local APIC id: 2
+  CPUID eax    : 0x00b00f81 -> family 0x1a model 0x8 stepping 1
+
+  [Processor Error Info 1] Micro-Architectural Check
+     valid bits : 0x1 (check_info=Y target=n requestor=n responder=n ip=n)
+     check_info : 0x0000000000150005
+
+  [Context Info 1] type=1 (MSR Registers) size=128 msr_base=0xc0002011
+       MSR 0xc0002011 = 0xbc800800060c0859
+       MSR 0xc0002012 = 0x0000000067f4e500
+       MSR 0xc0002013 = 0xd0140ffe00000000
+       MSR 0xc0002014 = 0x00000001000003eb
+       MSR 0xc0002015 = 0x000100b0002002aa
+       MSR 0xc0002016 = 0x0000000000000000
+       MSR 0xc0002017 = 0x0000000000000000
+       MSR 0xc0002018 = 0x0000000000000000
+       MSR 0xc0002019 = 0x0000000000000000
+       MSR 0xc000201a = 0x0000000000000000
+       MSR 0xc000201b = 0x0000000000000000
+       MSR 0xc000201c = 0x0000000000000000
+       MSR 0xc000201d = 0x0000000000000000
+       MSR 0xc000201e = 0x3a30532072726550
+       MSR 0xc000201f = 0x3130423a32303054
+       MSR 0xc0002020 = 0x0000000000000000
+
+  [Context Info 2] type=3 (64-bit x86 context) size=256 msr_base=0x0
+       dc03f56700000000020000000000000000701b670000000018aef467000000000000000000000000a0ad1f670000000000d0ff5f000000000000000000000000
+
+--- Error Data Entry 5 ---
+  section type : Platform Memory Error
+  severity     : 1 (FATAL)
+  flags        : 0x01 (primary )
+  FRU text     : 'Perr S0:T002:B15'
+  data length  : 80 bytes  (revision 0x0300, timestamp raw 0x0000000000000000)
+
+--- Error Data Entry 6 ---
+  section type : IA32/X64 Processor Error
+  severity     : 0 (Recoverable)
+  flags        : 0x01 (primary )
+  FRU text     : 'Perr S0:T002:B15'
+  data length  : 544 bytes  (revision 0x0300, timestamp raw 0x0000000000000000)
+  validation   : 0x207 -> 1 error-info struct(s), 2 context struct(s)
+  local APIC id: 2
+  CPUID eax    : 0x00b00f81 -> family 0x1a model 0x8 stepping 1
+
+  [Processor Error Info 1] Micro-Architectural Check
+     valid bits : 0x1 (check_info=Y target=n requestor=n responder=n ip=n)
+     check_info : 0x0000000000850021
+
+  [Context Info 1] type=1 (MSR Registers) size=128 msr_base=0xc0002151
+       MSR 0xc0002151 = 0xfea000000004080b
+       MSR 0xc0002152 = 0x00000254542a2a2a
+       MSR 0xc0002153 = 0xd0150fff01000000
+       MSR 0xc0002154 = 0x00000005000003ef
+       MSR 0xc0002155 = 0x0000009600250f00
+       MSR 0xc0002156 = 0x000000005d000008
+       MSR 0xc0002157 = 0xc42010000400011b
+       MSR 0xc0002158 = 0x000000000c01c040
+       MSR 0xc0002159 = 0xd0150fff01000000
+       MSR 0xc000215a = 0x0000000000000000
+       MSR 0xc000215b = 0x0000000000000000
+       MSR 0xc000215c = 0x0000000000000000
+       MSR 0xc000215d = 0x0000000000000000
+       MSR 0xc000215e = 0x3a30532072726550
+       MSR 0xc000215f = 0x3531423a32303054
+       MSR 0xc0002160 = 0x0000000000000000
+
+  [Context Info 2] type=3 (64-bit x86 context) size=256 msr_base=0x0
+       dc03f56700000000020000000000000000701b670000000018aef467000000000000000000000000a0ad1f670000000000d0ff5f000000000000000000000000
+
+--- Error Data Entry 7 ---
+  section type : Platform Memory Error
+  severity     : 0 (Recoverable)
+  flags        : 0x01 (primary )
+  FRU text     : 'Perr S0:T002:B16'
+  data length  : 80 bytes  (revision 0x0300, timestamp raw 0x0000000000000000)
+
+--- Error Data Entry 8 ---
+  section type : IA32/X64 Processor Error
+  severity     : 0 (Recoverable)
+  flags        : 0x01 (primary )
+  FRU text     : 'Perr S0:T003:B00'
+  data length  : 544 bytes  (revision 0x0300, timestamp raw 0x0000000000000000)
+  validation   : 0x207 -> 1 error-info struct(s), 2 context struct(s)
+  local APIC id: 3
+  CPUID eax    : 0x00b00f81 -> family 0x1a model 0x8 stepping 1
+
+  [Processor Error Info 1] Cache Check
+     valid bits : 0x11 (check_info=Y target=n requestor=n responder=n ip=Y)
+     check_info : 0x000000003c4d00f7
+     decoded    : txn=Instruction, op=Generic error, level=4, UNCORRECTED=1, precise-ip=1, restartable-ip=0, overflow=0
+     instr ptr  : 0x000000004ff6ff00
+
+  [Context Info 1] type=1 (MSR Registers) size=128 msr_base=0xc0002001
+       MSR 0xc0002001 = 0xfc000800000c0135
+       MSR 0xc0002002 = 0x000000006720cd00
+       MSR 0xc0002003 = 0xd0140ffe00000000
+       MSR 0xc0002004 = 0x00000005000003ef
+       MSR 0xc0002005 = 0x000000b0001f00ff
+       MSR 0xc0002006 = 0x0000000000000000
+       MSR 0xc0002007 = 0x0000000000000000
+       MSR 0xc0002008 = 0x0000000000000000
+       MSR 0xc0002009 = 0x0000000000000000
+       MSR 0xc000200a = 0x0000000000000000
+       MSR 0xc000200b = 0x0000000000000000
+       MSR 0xc000200c = 0x0000000000000000
+       MSR 0xc000200d = 0x0000000000000000
+       MSR 0xc000200e = 0x3a30532072726550
+       MSR 0xc000200f = 0x3030423a33303054
+       MSR 0xc0002010 = 0x0000000000000000
+
+  [Context Info 2] type=3 (64-bit x86 context) size=256 msr_base=0x0
+       dc03f56700000000020000000000000000701b670000000018aef467000000000000000000000000a0ad1f670000000000d0ff5f000000000000000000000000
+
+===== Platform Memory Error sections =====
+=== entry 2: Recoverable  FRU='Perr S0:T000:B15'  (valid=0x4827b) ===
+    valid fields: ErrorStatus, PhysicalAddress, Node, Card, Module, Bank, Column, RankNumber, ExtendedRow
+    ErrorStatus     : 0x0000000000040400
+    PhysicalAddress : 0x000000004df7da00
+    Node            : 0
+    Card            : 0
+    Module          : 0
+    Bank            : 0
+    Column          : 1696
+    RankNumber      : 1
+
+=== entry 5: FATAL  FRU='Perr S0:T002:B15'  (valid=0x4039) ===
+    valid fields: ErrorStatus, Node, Card, Module, ErrorType
+    ErrorStatus     : 0x0000000000011600
+    Node            : 0
+    Card            : 2
+    Module          : 0
+    ErrorType       : 8 (Parity error)
+
+=== entry 7: Recoverable  FRU='Perr S0:T002:B16'  (valid=0x4827b) ===
+    valid fields: ErrorStatus, PhysicalAddress, Node, Card, Module, Bank, Column, RankNumber, ExtendedRow
+    ErrorStatus     : 0x0000000000040400
+    PhysicalAddress : 0x000000004df7b380
+    Node            : 0
+    Card            : 3
+    Module          : 0
+    Bank            : 26
+    Column          : 1680
+    RankNumber      : 1
+
+=== entry 9: Recoverable  FRU='Perr S0:T004:B16'  (valid=0x4827b) ===
+    valid fields: ErrorStatus, PhysicalAddress, Node, Card, Module, Bank, Column, RankNumber, ExtendedRow
+    ErrorStatus     : 0x0000000000040400
+    PhysicalAddress : 0x000000004df80d80
+    Node            : 0
+    Card            : 5
+    Module          : 0
+    Bank            : 7
+    Column          : 1712
+    RankNumber      : 1
+
+=== entry 15: Recoverable  FRU='Perr S0:T008:B15'  (valid=0x4827b) ===
+    valid fields: ErrorStatus, PhysicalAddress, Node, Card, Module, Bank, Column, RankNumber, ExtendedRow
+    ErrorStatus     : 0x0000000000040400
+    PhysicalAddress : 0x000000004d54da80
+    Node            : 0
+    Card            : 8
+    Module          : 0
+    Bank            : 18
+    Column          : 880
+    RankNumber      : 1
+
+=== entry 16: Recoverable  FRU='Perr S0:T008:B16'  (valid=0x4827b) ===
+    valid fields: ErrorStatus, PhysicalAddress, Node, Card, Module, Bank, Column, RankNumber, ExtendedRow
+    ErrorStatus     : 0x0000000000040400
+    PhysicalAddress : 0x00000000480dd000
+    Node            : 0
+    Card            : 9
+    Module          : 0
+    Bank            : 5
+    Column          : 576
+    RankNumber      : 0
+
+
+===== Census of all 168 error data entries =====
+   CPU      FATAL        x70
+   CPU      Recoverable  x92
+   MEMORY   FATAL        x1
+   MEMORY   Recoverable  x5
