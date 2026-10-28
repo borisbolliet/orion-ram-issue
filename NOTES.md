@@ -1356,3 +1356,75 @@ serials `CA0A997B`, `A80A9950`, `A00AA31B`, `9D0AA163`, `AB0A997B`, all at 6400 
 `ras-mc-ctl --errors` reads them back. The useful change is to alert on the *first* CE of a
 burst rather than discover it afterwards, which buys 2 hours of warning to drain work off
 the machine before the reset.
+
+## Slot-failure census — only ever B, C, F, G
+
+Assembled across the whole case. Every DIMM-loss event, and which slots were lost:
+
+| date | slots lost |
+|---|---|
+| 2026-06-08 | B, C, F, G |
+| 2026-06-15 | B, F |
+| 2026-09-19 21:11 | F, G |
+| 2026-09-19 23:04 | B, C, F, G |
+| 2026-09-21 (derated to 5600) | **none — all 8 trained, F and G came back** |
+| 2026-10-13 | B, C |
+| 2026-10-28 02:11 | F |
+| 2026-10-28 14:22 | B, C |
+
+**A, D, E and H have never been lost. Not once, in five months, across two BIOS versions
+and every load condition.** Every single casualty has come from {B, C, F, G}.
+
+Today's precursor confirms it at the OS level independently of POST training: all eight
+pre-crash corrected ECC errors were on **B and C**, no other slot.
+
+### What the pattern means
+
+The failure follows **slot position**, deterministically. It does not follow the module —
+no module has ever been moved and the serials are fixed, so a travelling defect is
+excluded. And it is not random: a 7-event run confined to the same four of eight slots is
+not chance.
+
+It is also **mirror-symmetric**: {B, C} on one bank and {F, G} on the other are the same
+two positions within each four-slot bank, with the first and last of each bank surviving.
+A position-dependent property replicated on both halves of the board fits a routing,
+termination or DRAM-power-zone characteristic — and fits the CPU's channel pin assignment
+equally well, since that is itself laid out symmetrically to permit symmetric board
+routing. **The symmetry does not discriminate CPU from board.**
+
+ASUS's own population order in the manual (1 DIMM → A1; 2 → A1,E1; 4 → +B1,F1;
+6 → +C1,G1; 8 → all) does *not* predict the failures: D and H are populated last and never
+fail, while A and E are populated first and also never fail. So the failing set is not
+simply "the channels ASUS ranks worst". Don't lean on it in either direction.
+
+### Combined with the 5600 result and today's precursor
+
+Three facts that have to be explained together:
+
+1. Four channels are marginal and four are not — a **static** property, stable for months.
+2. At 5600 MT/s all eight train and the machine is stable — a **margin** deficit, not a
+   dead cell or a broken trace.
+3. Today, B and C accumulated corrected errors over two hours at a rising rate before
+   collapsing — a **time- or temperature-dependent** erosion of what margin is left.
+
+So: four channels sit near the edge of their timing budget at 6400, and something
+progressive eats the remainder. Tctl p95 was **94.6 °C** on that boot (max 95.1), at the
+limit for this part. The UMCs are on the CPU's I/O die; sustained operation at 95 °C is a
+credible margin-erosion mechanism, and a credible long-term degradation mechanism for
+socket contact resistance through thermal cycling.
+
+This is *not* the thermal hypothesis retired on 2026-10-27. That one claimed temperature at
+the instant of the crash was the trigger, and the 68–70 °C crashes falsified it. This claim
+is about cumulative exposure eroding a static margin deficit, and it is consistent with
+crashes occurring at any instantaneous temperature.
+
+### Operational consequence — go back to 5600
+
+The machine is at **5/8 DIMMs (314 GiB)** and has lost three modules in 24 hours. It is
+only at 6400 because PCS asked for defaults for their test. **That test is complete**: three
+crashes on 1317 at defaults, the fatal parity signature reproduced, three DIMMs mapped out.
+Continuing at 6400 buys no further information and costs availability. The 2026-09-21
+result says 5600 restores 8/8 and goes quiet.
+
+Revert to DDR5-5600 in `Ai Tweaker` → `Memory Frequency` and keep the 6400 record as the
+warranty evidence.
