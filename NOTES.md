@@ -971,3 +971,388 @@ overload as a universal cause; it does not rule out high GPU current contributin
 droop and memory margin loss during the parity crashes. Keeping the cap.
 
 Tctl reached 95.90 °C this boot, the highest in the record and at the limit for this part.
+
+## 2026-10-26/27 — BIOS 1317 flashed. It did not fix the fault.
+
+PCSpecialist (Summer Phillips, second-line tech, 15 Oct) asked for two things: stop touching
+the CPU/socket, and flash the BIOS then re-test with memory settings at default. Both done.
+
+### The flash took, and the sold spec held
+
+    BIOS version   : 1317          (was 1203)
+    BIOS date      : 02/03/2026    (was 18/07/2025)
+    MemTotal       : 536,207,768 K = 8/8 DIMMs
+    Configured     : 6400 MT/s on all 8, with Ai Overclock Tuner on Auto
+
+6400 at defaults confirms these are JEDEC-rated 6400 RDIMMs, not an overclock. PCS's test
+condition and the sold specification are the same thing, which is the ideal outcome.
+
+### It crashed 10 h 06 m later
+
+| | |
+|---|---|
+| post-flash boot | 2026-10-26 14:26:57 |
+| last sample | 2026-10-27 00:33:30 |
+| outage | **489.6 min (8 h 10 m)**, manual power-on at 08:43:07 |
+| firmware record | **none** — BERT table is the no-error stub (`data_length 0`, `severity 3`) |
+| DIMMs on return | 8/8 |
+
+Conditions at the reset:
+
+    DRAM      0.532 GB/s      cpu 0.75%      load1 2.55
+    Tctl      94.1 C
+    GPU0      449.99 W        GPU1      449.95 W
+
+**Both GPUs at their 450 W caps simultaneously — the first time on record.** Roughly 900 W of
+GPU plus an idle CPU, board, drives and cooling: on the order of 1.2–1.3 kW, the highest
+system draw measured at any crash. DRAM traffic and CPU were at idle, so this is not the
+memory-bandwidth mode.
+
+Tctl at 94.1 °C with the CPU 0.75% busy is itself odd and worth watching — that is case heat
+from two 450 W cards, not CPU work.
+
+### The question that now matters most
+
+Was **Restore AC Power Loss** set to **Power On** in the BIOS after the flash? It is the
+difference between two readings of the 8-hour outage:
+
+  - **Set to Power On, and it still stayed dead** → mains returning would have restarted it.
+    That rules out a simple blip and points hard at the PSU latching itself off.
+  - **Not set** → the 8 hours tells us nothing.
+
+Unanswered as of this entry. Cannot be read from Linux.
+
+### Other crashes this window (both pre-flash, BIOS 1203)
+
+**10-23 18:21:10** — 3.9 min reset at **154.8 GB/s**, 33.8% CPU, Tctl 71.5, GPUs idle.
+Returned 7/8 (469,080,904 K). BERT captured (`bert-record-20261023.bin`, 780 B): five memory
+sections on cards **2, 3, 5, 8, 9**, all Recoverable or Corrected with real physical
+addresses, **no FATAL parity entry and no map-out**. Memory-bandwidth mode.
+
+**10-25 22:14:54** — 972 min (16.2 h) outage at idle (3.1 GB/s, 2.6% CPU), GPUs idle,
+trace-free, manual power-on. This is the outage Boris ended on 26 Oct by powering up and
+flashing.
+
+### Corrected ECC errors, 23–25 Oct (all pre-flash)
+
+    10-23 18:20:03  channel 11 csrow 1
+    10-24 22:43:29  channel  5 csrow 0
+    10-25 07:16:55  channel  5 csrow 1
+    10-25 11:11:46  channel  5 csrow 1
+
+None since the flash, but there have only been ~10 h of post-flash runtime, so that means
+nothing yet.
+
+### Where this leaves the warranty case
+
+PCS asked for the firmware update and it has been done exactly as instructed, at their
+chosen version, with memory at defaults. The machine still resets. That is a much stronger
+position than before: the next message asks them to action the two items they did not
+respond to — socket inspection, and validation at the sold specification under sustained
+load.
+
+Services all survived the flash: `orion-bwmon` active, `orion-bert-capture` enabled,
+`nvidia-powerlimit` active with both caps at 450 W.
+
+Note: `bw-*.csv` timestamps around 2026-10-25 01:00 repeat for an hour (BST→GMT). Use
+wall-clock `ts_iso` deltas rather than `ts_epoch` when hunting gaps across that boundary.
+
+## 2026-10-27 13:13 — crash #N on BIOS 1317, and the thermal regime has changed completely
+
+Second crash on the new firmware. Died 13:13:51 after **4 h 31 m**, back at 13:21 by manual
+power-on. Trace-free again (BERT no-error stub). Returned 8/8.
+
+Conditions at the reset — the highest-everything crash on record:
+
+    DRAM      120.1 GB/s  = 15.0 GB/s per channel
+    cpu       35.7%       load1 61.12
+    Tctl      95.2 C
+    GPU0      450.02 W    GPU1      450.01 W
+
+### The regime change
+
+Comparing whole boots. Column "hot" is the fraction of samples above 94 °C.
+
+| boot | duration | Tctl med | hot | GPU0 mean | GPU1 mean | both >400 W |
+|---|---|---|---|---|---|---|
+| 10-14 14:47 | **194.8 h** | **56.9** | 0.5% | 32 W | 22 W | 0.1% |
+| 10-23 18:25 | 43.8 h | 61.4 | 3.3% | 24 W | 126 W | 0.0% |
+| 10-25 15:28 | 6.6 h | 57.2 | 0.0% | 27 W | 20 W | 0.0% |
+| 10-26 14:26 | 9.8 h | 60.8 | 3.8% | 81 W | 88 W | 13.3% |
+| **10-27 08:43** | **4.4 h** | **94.8** | **68.0%** | **426 W** | **440 W** | **93.4%** |
+
+The 8-day crash-free run had **both GPUs essentially idle** (32 W and 22 W means) and a CPU
+median of 56.9 °C. Since a sustained dual-GPU workload started, the CPU sits at a **median
+of 94.8 °C** and spends **68% of its time above 94 °C**. That is 900 W of GPU heat being
+dumped into a Define 7 XL and recirculated through the CPU cooler — the CPU is at 95 °C
+while only 35% busy, so this is case air, not CPU work.
+
+### Refining this morning's position
+
+Earlier today I argued heat was not the cause, on the grounds that the machine sat *hotter*
+than the crash temperature for 24 minutes of the same boot without dying. That within-boot
+argument still holds: temperature is not a trigger.
+
+Across boots the picture is different. The longest run on record by a factor of four was
+also by far the coolest. Heat and dual-GPU load are not sufficient to cause a crash, but
+they track how long the machine survives. Treat them as a stressor that shortens life, not
+as the trigger — which is exactly what loss of signal margin on a marginal memory interface
+would look like.
+
+Note also the within-boot numbers: the machine was above 13 GB/s per channel for only
+**6.6 minutes** of a 4.5-hour boot, and died inside one of those windows, with both GPUs
+loaded for 93% of the boot. The memory-bandwidth stressor and the thermal stressor landed
+together.
+
+### Action available now
+
+Lower the GPU caps from 450 W to ~300 W each. Removes 300 W of case heat, is remote,
+reversible, and testable against the regime that produced the 8-day run. Costs GPU
+throughput on someone's job, so it is Boris's call. `nvidia-powerlimit.service` already
+makes any cap persistent across reboots.
+
+Longer term this machine needs its case airflow looked at if two 450 W cards are going to be
+a normal workload. 900 W of GPU in a quiet-oriented tower with a 360 mm AIO is marginal.
+
+### Still unanswered
+
+`Restore AC Power Loss` — Boris was in the BIOS at 13:15 and confirmed memory and BIOS
+version, but not this setting. Baseline `Setup` efivar saved at
+`/var/log/orion-bwmon/efivar/Setup-baseline-20261027.bin` (sha256 ae5f528f…6820) for diffing
+once it is changed.
+
+### Restore AC Power Loss: it was OFF the whole time. Now set to Power On (2026-10-27)
+
+Boris found it set to **Power Off** and changed it to **Power On**.
+
+**This retires a line of reasoning.** Every long outage in this file — 17 h, 16.2 h, 20.3 h,
+8.2 h — was a machine configured to stay dead after losing power. "It needed a manual
+power-on" therefore says only that power was interrupted; it says nothing about whether the
+interruption was a brief mains blip or the PSU latching itself off. Those two remained
+indistinguishable, and earlier entries that leaned on the long outages as evidence for a
+latch should be read with that in mind.
+
+It also means a large part of the lost time was avoidable: outages that ran 16–20 hours
+would have been a reboot.
+
+**From now on the next long outage is diagnostic:**
+
+  - comes back by itself → power was lost and restored. Blip, or a PSU that recovered.
+  - still stays dead → power never returned on its own, i.e. the supply latched off hard.
+
+#### Reading the setting remotely without a reboot
+
+Diffing the `Setup` efivar across the change (baseline saved before it) isolated it:
+
+    offset 198 (0x0c6):  0 -> 2     Restore AC Power Loss  (0 = Power Off, 2 = Power On)
+    offset 437 (0x1b5):  1 -> 0     unidentified; likely a settings-changed flag
+
+Only two bytes moved for one menu change, so offset 198 is the setting with high confidence
+and 437 is incidental. To read it later:
+
+    ssh orion "sudo sh -c 'cat /sys/firmware/efi/efivars/Setup-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9' | od -An -tu1 -j198 -N1"
+
+Confirmed reading 2 as of 2026-10-27. Snapshots in `/var/log/orion-bwmon/efivar/`.
+Note the offsets are specific to BIOS 1317 and will move if the firmware is updated again.
+
+## 2026-10-27 17:14 — third crash on BIOS 1317, at complete idle. The envelope is now fully covered.
+
+Died 17:14:09, back 17:15:37. **Gap 88 seconds** — the fastest recovery in the whole record
+(previous internal resets ran 3.9–4.4 min) and apparently unattended. Trace-free, 8/8
+retained. Uptime 3 h 53 m.
+
+Conditions: **everything idle.**
+
+    DRAM   2.739 GB/s     cpu 2.30%      load1 0.67     mem 18.12 GiB
+    Tctl   70.4 C
+    GPU0   15.25 W        GPU1   19.51 W
+
+### Three crashes on 1317, spanning the entire operating envelope
+
+| time | uptime | DRAM | cpu | Tctl | GPU0 | GPU1 | outage |
+|---|---|---|---|---|---|---|---|
+| 10-27 00:33 | 10 h 06 m | 0.5 GB/s | 0.8% | 94.1 | 450 W | 450 W | 8 h 10 m |
+| 10-27 13:13 | 4 h 31 m | 120.1 GB/s | 35.7% | 95.2 | 450 W | 450 W | 7.2 min |
+| 10-27 17:14 | 3 h 53 m | 2.7 GB/s | 2.3% | **70.4** | **15 W** | **20 W** | **88 s** |
+
+Idle and loaded. Hot and cool. GPUs pegged and GPUs off. High memory bandwidth and none.
+**No operating condition is common to all three.**
+
+This retires the thermal/dual-GPU line opened this afternoon. Heat and GPU load correlate
+with survival time across the longer boots — the 8-day run really was the cool one — but
+they cannot be the driver, because the machine has now died at 70 °C with both cards idle.
+The earlier reading stands only as "a stressor that shortens life", and even that is now
+doing less work than it appeared to this afternoon.
+
+### The intervals are shortening
+
+On BIOS 1317: **10 h 06 m → 4 h 31 m → 3 h 53 m**. Three crashes in 28 hours.
+
+For comparison, the preceding boots on 1203 ran 194.8 h, 43.8 h and 6.6 h. The firmware
+update has not helped, and the machine is getting worse rather than holding steady.
+
+### On the AC Power Loss setting
+
+Now confirmed live at the firmware level (byte 198 = 2, Power On). This crash recovered in
+88 s, which is too fast to distinguish an internal warm reset from a power interruption
+followed by auto-restart — and a true AC loss would force a full retrain of 512 GB and boot
+*slower*, not faster, so a warm internal reset remains the better reading.
+
+The setting earns its keep on the next **long** outage: if the machine comes back by itself
+after minutes or hours, power was lost and restored; if it still sits dead, the supply
+latched off.
+
+## 2026-10-28 02:11 — THE FATAL PARITY ERROR RECURS ON BIOS 1317
+
+Fourth crash on the new firmware, and the first to leave a FATAL firmware record. This is
+the decisive result: **the AGESA update did not fix the fault.**
+
+### The record — `bert-record-20261028.bin`, 17,364 B, 34 entries, severity FATAL
+
+**Two** fatal entries this time, both MCA bank 0x15 (Unified Memory Controller):
+
+    Section      : Platform Memory Error      Section      : Platform Memory Error
+    Severity     : FATAL                      Severity     : FATAL
+    FRU          : 'Perr S0:T002:B15'         FRU          : 'Perr S0:T008:B15'
+    ErrorStatus  : 0x0000000000011600         ErrorStatus  : 0x0000000000011600
+    ErrorType    : 8 (Parity error)           ErrorType    : 8 (Parity error)
+    valid mask   : 0x4039                     valid mask   : 0x4039
+    Location     : Node 0, Card 2, Module 0   Location     : Node 0, Card 8, Module 0
+
+`ErrorStatus = 0x0000000000011600` is **bit-for-bit identical** to the records of 17 Sep and
+13 Oct, taken on BIOS 1203: bits 8–15 = 22 = `ERR_PARITY`, bit 16 (Address) set, bits 17
+(Control) and 18 (Data) clear. Validity mask `0x4039` again carries no PhysicalAddress,
+Bank, Row, Column or Rank — there is no address to report because the address itself
+arrived corrupted.
+
+Four AGESA revisions of memory-training and stability work changed nothing about this fault.
+
+**It has also doubled.** Previously one fatal parity entry per event — Card 2 on 17 Sep,
+Card 8 on 13 Oct. Both cards now fire in the same instant. Six controllers reported
+altogether (Cards 2, 3, 5, 6, 8, 9), the same six-of-eight census as every prior event.
+
+### Conditions
+
+    DRAM   167.571 GB/s  = 20.9 GB/s per channel   <- highest per-channel at any crash
+    cpu    36.51%        load1 59.32               mem 53.15 GiB
+    Tctl   68.0 C                                  <- cool
+    GPU0   14.50 W       GPU1   12.68 W            <- both idle
+
+4.0 min reset, returned **7/8** — **slot F dropped** (461,378,504 kB ≈ 440 GiB). F was the
+6/6 absentee in early October, trained fine on 13 Oct when B and C dropped instead, and is
+now out again. Serials unchanged: A `CA0A997B`, B `A00A9902`, C `9E0AA2C7`, D `A80A9950`,
+E `A00AA31B`, G `9D0AA163`, H `AB0A997B`.
+
+This is the memory-bandwidth mode in its purest form yet — highest per-channel traffic on
+record, cool, GPUs idle. It confirms the thermal and GPU lines are irrelevant to *this*
+mode, and it is the mode that produces firmware records and costs DIMMs.
+
+### Correction to yesterday's "intervals are shortening"
+
+I called the cadence accelerating on three points (10 h 06 → 4 h 31 → 3 h 53). The fourth
+breaks it: this boot ran **8 h 56 m**. Four crashes on 1317 in 36 hours, but no monotonic
+trend. The rate is high; it is not provably rising.
+
+### Where this leaves PCSpecialist
+
+They asked for exactly one thing: flash the BIOS and re-test with memory at defaults. Done,
+at their chosen version, verified at 8 x 64 GB / 6400 MT/s on Auto. The identical fatal
+hardware error recurred within 36 hours, now on two controllers at once, and cost a DIMM.
+
+The remaining asks — socket inspection, and validation at the sold specification under
+sustained load — are no longer requests they can defer to a firmware update.
+
+## 2026-10-28 14:22 — the first crash with a visible precursor
+
+Crash #18. Boot 02:15:53 → last sample **14:22:20** = **12 h 06 m**, the longest run on
+1317. Self-reset of 3.8 min, back at 14:26:11. Returned at **5/8 DIMMs** (`MemTotal`
+329,258,012 kB ≈ 314 GiB) — the smallest total of the whole investigation.
+
+### Linux saw it coming
+
+For the first time the OS logged the fault *before* the machine died. Eight corrected ECC
+errors in the final 2 h 11 m of an otherwise clean 12-hour boot, every one with the
+overflow bit set:
+
+| time | slot | channel | bank |
+|---|---|---|---|
+| 12:11:05 | **C** | 0 | MC21 |
+| 12:11:05 | **C** | 5 | MC22 |
+| 12:32:56 | **B** | 5 | MC22 |
+| 13:16:37 | **C** | 0 | MC21 |
+| 13:27:32 | **B** | 5 | MC22 |
+| 13:38:28 | **B** | 5 | MC22 |
+| 13:38:28 | **B** | 0 | MC21 |
+| 14:22:09 | **B** | 5 | MC22 |
+
+`MC22_STATUS[Over|CE|MiscV|AddrV|-|-|SyndV|CECC|-|-|-]`, `cache level: L3/GEN, tx: GEN,
+mem-tx: RD`, `Unified Memory Controller Ext. Error Code: 0`. The last one:
+
+    14:22:09  FRU Text: Locator: P0MB0
+              Error Addr: 0x0000000c5b7d3f40
+              Syndrome: 0x020002000a801209
+              EDAC MC0: 1 CE on mc#0csrow#1channel#5
+
+**Eleven seconds later the machine was gone, and B and C did not come back.** The
+precursor named the casualties in advance. Nothing like this appears in any earlier boot —
+every previous DIMM loss was silent until the firmware record was read after the fact.
+
+`Over` on all eight means each logged CE is the survivor of a burst the bank could not
+hold, so eight entries understate the real count.
+
+### Firmware record — `bert-record-20261028-1426.bin`
+
+141,924 bytes, severity FATAL, **268 entries**: 262 IA32/X64 Processor Error sections
+spanning threads T000–T095 (90 Cache Check, 172 Micro-Architectural Check, uncorrected
+L4/GEN instruction fetches — the machine-check fallout across the whole part) and 6
+Platform Memory Error sections.
+
+    entry  1   FATAL        FRU 'Locator: P0MF0'   Card 11  ErrorType 15 (Physical memory map-out)
+    entry  9   FATAL        Perr S0:T002:B16       Card  3  ErrorType  8 (Parity error)  ErrorStatus 0x11600
+    entry  8   Recoverable  Card 2   0x40400  PA 0x780bc340     bank 31  col 576  rank 1
+    entry 16   Corrected    Card 6   0x40400  PA 0x507e30f900   bank 18  col 864  rank 0
+    entry 19   Corrected    Card 8   0x40400  PA 0x507e2f5d40   bank  7  col 768  rank 0
+    entry 20   Recoverable  Card 9   0x40400  PA 0x20e68ca900   bank  1  col 224  rank 0
+
+Two things are new in the firmware record. First, a **map-out event and a fatal parity
+error in the same record** — on 13 Oct 16:09 the map-out (slots C and B) came in a record
+of its own with no parity error, and at 02:11 today the two parity errors came with no
+map-out. Second, the map-out names **`P0MF0`, slot F**, which was already untrained at this
+boot, so the firmware is re-asserting a map-out for a slot it had already dropped.
+
+`ErrorStatus 0x11600` on Card 3 is again bit-for-bit the 17 Sep / 13 Oct / 02:11 signature.
+Fifth occurrence, third BIOS-1317 occurrence, now on a third distinct controller (Card 8,
+then Cards 2+8, now Card 3).
+
+### Conditions
+
+    DRAM    56.2 GB/s   = 8.0 GB/s per channel over 7 channels
+    cpu      9.72%      load1 19.10              mem 88.92 GiB
+    Tctl    83.1 C                               (boot max 95.1, p95 94.6)
+    GPU0   229 W  100% util  55 C                GPU1  237 W  100% util  69 C
+
+Mid-envelope on every axis. Both GPUs pinned at 100 % but drawing ~230 W each, well inside
+the 450 W cap. Not the ≥13 GB/s/channel fast-kill regime, not idle either.
+
+### What this changes
+
+The dose-response picture does not explain this crash — 8.0 GB/s/channel ran fine for ten
+hours before the errors started, and the errors started while nothing about the load
+changed. What the precursor shows instead is **progressive degradation on specific
+channels**: B and C accumulated correctable errors for two hours, the error rate rose, and
+then the controller gave up and the box reset. That is a different shape of story from
+"load crosses a threshold and it dies instantly", and it is the first mechanism in this
+investigation that is directly observable while the machine is still alive.
+
+It also means the two failure modes may not be two. A silent crash is what this looks like
+if the degradation runs faster than the 20-minute gaps between logged bursts.
+
+Slots lost so far, cumulatively: F (02:11), B and C (14:22). Trained now: A, D, E, G, H —
+serials `CA0A997B`, `A80A9950`, `A00AA31B`, `9D0AA163`, `AB0A997B`, all at 6400 MT/s.
+
+### Action: watch the precursor
+
+`rasdaemon` already stores these to `/var/lib/rasdaemon/ras-mc_event.db` and
+`ras-mc-ctl --errors` reads them back. The useful change is to alert on the *first* CE of a
+burst rather than discover it afterwards, which buys 2 hours of warning to drain work off
+the machine before the reset.
