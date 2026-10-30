@@ -1428,3 +1428,106 @@ result says 5600 restores 8/8 and goes quiet.
 
 Revert to DDR5-5600 in `Ai Tweaker` → `Memory Frequency` and keep the 6400 record as the
 warranty evidence.
+
+## 2026-10-30 11:17 — first deliberate reproduction. 38 seconds.
+
+`mpstress` (source and binary at `orion:/home/cmbagent/orion-stress/`) was run as a
+worker-count ramp: `512` MB per worker, `240` s per stage, stages of 24 / 48 / 96 / 192
+workers. It did not reach stage 3.
+
+**The run's own log did not survive.** The binary that executed at 11:12 is not the one now
+in `/home/cmbagent/orion-stress/` (both files there were created at 11:34, after the
+reboot), and no `ramp.log` exists anywhere on the filesystem. Everything below is
+reconstructed from `orion-bwmon`, which sampled throughout at ~2 s. Next run: put the log
+under `/scratch` or `/var/log/orion-bwmon/` and confirm it exists before starting.
+
+### Starting condition — fully recovered, 41 hours clean
+
+The 2026-10-28 18:14:48 boot trained **8/8 at 503 GiB**, back up from 5/8 (314 GiB) after
+the 14:22 crash. It then ran **41 h 03 m** at light load with no incident — the
+second-longest run on record, behind only 63.1 h. `ce_count` and `ue_count` zero.
+
+### The run
+
+| | stage 1 | stage 2 |
+|---|---|---|
+| workers | 24 | 48 |
+| window | 11:12:23 → 11:16:25 | 11:16:27 → **11:17:05** |
+| duration | **232 s — survived** | **38 s — died** |
+| DRAM sustained | 160 GB/s | 163 GB/s |
+| per channel (8 ch) | **20.1 GB/s** | **20.4 GB/s** |
+| cpu_busy | 13.3 % | 26.3 % |
+| mem_used | 112.8 GiB | 124.4 GiB |
+| Tctl | 59–66 °C | 60–63 °C |
+| GPUs | idle, 17–20 W | idle, 17–20 W |
+
+The 288–296 GB/s in the first ~15 s of stage 1 is a first-touch transient (page allocation
+and zeroing), not sustained load. Discount it.
+
+4.3 min self-reset, back at 11:21:20 with **6/8 — F and G dropped** (377 GiB).
+
+### Thermal and GPU: conclusively excluded
+
+Tctl never exceeded **65.9 °C**, 29 °C below the 95 °C limit this part has been hitting on
+ordinary workloads. Both GPUs idle at under 20 W, so total system draw was a few hundred
+watts against a 1600 W PSU. Memory pressure was 124 GiB of 503. The machine was killed with
+every other axis of the envelope slack. **Memory traffic alone, in isolation, hard-resets
+this machine in 38 seconds.** That is the single cleanest result in the case.
+
+### It is NOT per-channel bandwidth
+
+This is a correction to the dose-response model. Sustained bandwidth in the two stages was
+**the same** — 160 vs 163 GB/s, 20.1 vs 20.4 GB/s per channel. Both stages were
+bandwidth-saturated; that is this access pattern's ceiling. Stage 1 held 20.1 GB/s/channel
+for four minutes without trouble. Stage 2 held 20.4 and died in 38 seconds.
+
+So the "≥13 GB/s/channel → dies within the hour" rule from the observational data was
+fitting the wrong variable. What actually doubled between the stages:
+
+- worker processes 24 → 48, so **concurrent independent address streams** 24 → 48
+- `cpu_busy` 13.3 % → 26.3 %
+- resident buffer set 12 GiB → 24 GiB
+
+At constant data throughput, doubling the number of scattered streams roughly doubles the
+**row-activation and command rate** — ACT/PRE/RD/WR traffic on the command/address bus —
+because each stream walks its own rows. Sequential streaming moves many bytes per
+activation; 48 independent streams move the same bytes with far more commands.
+
+**The fatal signature in this case has always been CA-bus parity with the Address bit set**
+(`ErrorStatus 0x11600`, `ERR_PARITY`, no reportable address because the address itself
+arrived corrupted). An experiment that holds data throughput constant and doubles command
+rate, and kills the machine six times faster, points straight at the command/address bus
+rather than the data path. The two lines of evidence now agree.
+
+Caveats, stated plainly: n = 1, two stages. Stage 1 ran only 232 s and might have died at
+300. Doubling workers also doubled CPU utilisation, so CA rate is not cleanly isolated from
+SoC/Infinity-Fabric activity. This is a strong hint, not a proof.
+
+### No fatal firmware record, and no warning
+
+`bert-record-20261030.bin`, 780 bytes, **severity 2 (Corrected)**. Five Platform Memory
+Error sections, all the routine `0x40400` DRAM storage errors with resolved addresses on
+Cards 2, 3, 5, 8, 9. **No parity entry. No map-out entry.** Yet the machine hard-reset and
+permanently lost two DIMMs.
+
+`mpstress` aborts on the first new EDAC CE. It never fired — `ce_count` was still 0 at the
+reset, and the previous boot's journal contains **zero** `Hardware Error` lines. So unlike
+28 Oct, there was no precursor at all: no corrected errors, no two-hour ramp, nothing. The
+box simply stopped.
+
+This blurs the two failure modes further. A reset under heavy memory traffic can come with
+a full fatal parity record (17 Sep, 13 Oct, 28 Oct 02:11), with a map-out record
+(19 Sep, 13 Oct 16:09), with a two-hour corrected-error precursor (28 Oct 14:22), or with
+nothing but routine corrected entries and no warning (today). The firmware record is not a
+reliable discriminator and the absence of one means nothing.
+
+### Census holds
+
+F and G. Eight loss events now, every casualty still from **{B, C, F, G}**; A, D, E and H
+have never been lost.
+
+### Still at 6400
+
+The 2026-10-28 recommendation to revert to DDR5-5600 was not applied — `dmidecode` reports
+6400 MT/s on all six trained modules. The machine is now a reproducible test rig for the
+fault, which is useful, but it is not a usable workstation at this setting.
