@@ -1531,3 +1531,101 @@ have never been lost.
 The 2026-10-28 recommendation to revert to DDR5-5600 was not applied — `dmidecode` reports
 6400 MT/s on all six trained modules. The machine is now a reproducible test rig for the
 fault, which is useful, but it is not a usable workstation at this setting.
+
+## 2026-10-30 12:23 — reproduced on demand in 9 m 56 s, fully instrumented
+
+Second deliberate run, launched from my laptop with a pre-run state snapshot and the log on
+persistent disk. Stage length raised from 240 s to **1800 s** specifically to find out
+whether the previous run's stage 1 had genuinely survived or had merely been cut short.
+
+    runner   orion:/home/cmbagent/orion-stress/run_stress.sh
+    command  mpstress runs/ramp-20261030-1215.log 512 1800 24 48 96
+    launched 2026-10-30 12:14:03
+    log      mpstress-ramp-20261030-1215.log   (589 samples, fsync'd per line, survived)
+    state    mpstress-ramp-20261030-1215.state
+
+### It died in stage 1
+
+**Time to failure: 596 s = 9 min 56 s, at 24 workers.** It never reached stage 2.
+
+    steady state (24 workers x 512 MB)
+      verify rate     79.8 GB/s      <- mpstress's own write+verify accounting
+      DRAM total     ~125.6 GB/s     <- bwmon, all traffic
+      per channel      20.9 GB/s     <- over 6 trained channels
+      Tctl            mean 61.7 C,  max 71.2 C
+      MemAvailable    min 341.5 GB of 377   (floor 150)
+      load1           max 26.4
+      ce 0   ue 0   bad_words 0      <- on every one of 589 samples, to the last line
+
+3 min self-reset, back at 12:27. Returned **5/8 — slot B dropped** (314 GiB). Trained now:
+A `CA0A997B`, C `9E0AA2C7`, D `A80A9950`, E `A00AA31B`, H `AB0A997B`.
+
+### Correction: the command-rate hypothesis is dead
+
+Yesterday I argued the dose variable was command rate / concurrency rather than bandwidth,
+because stage 1 had held 20.1 GB/s/channel for 232 s at 24 workers while stage 2 died in
+38 s at 48 workers with the same bandwidth. **That reading was wrong.**
+
+| run | workers | per channel | outcome |
+|---|---|---|---|
+| 11:12 stage 1 | 24 | 20.1 GB/s | survived 232 s — **timer advanced it** |
+| 11:16 stage 2 | 48 | 20.4 GB/s | died at 38 s (4 m 40 s cumulative) |
+| 12:14 stage 1 | 24 | 20.9 GB/s | **died at 596 s** |
+
+The first stage 1 had not survived; it had not yet finished dying. With a 240 s stage it was
+moved on at 232 s, and the 38 s I attributed to doubled concurrency was the run arriving at
+its time-to-failure. Twenty-four workers kill the machine unaided, so concurrency is not
+required and the stream-count reading has no support.
+
+Back to the simpler model: **sustained high per-channel memory traffic resets this machine
+within minutes, largely independent of how many threads generate it.** Two points do not
+make a curve, though — 232 s survived at 20.1 and 596 s died at 20.9 are not enough to
+claim a dose-response relation, and the 4 m 40 s vs 9 m 56 s difference between runs is
+unexplained.
+
+### The firmware record is the complete signature
+
+`bert-record-20261030-1223.bin`, 96,164 bytes, **severity FATAL**, 198 entries: 191
+IA32/X64 Processor Error sections (76 Cache Check, 115 Micro-Architectural Check) and 7
+Platform Memory Error sections.
+
+    entry  1   FATAL        'Locator: P0MG0'   Card  6   ErrorType 15 (map-out)
+    entry  2   FATAL        'Locator: P0MF0'   Card 11   ErrorType 15 (map-out)
+    entry 11   FATAL        Perr S0:T008:B15   Card  8   ErrorType  8 (Parity)  0x11600
+    entries 4, 6, 7, 13     Recoverable, 0x40400, addressed, Cards 0, 2, 3, 9
+
+`ErrorStatus 0x11600` on Card 8 is the **sixth** occurrence of the signature and the same
+card as 17 Sep and 13 Oct. **It is now reproducible on demand in under ten minutes.**
+
+Note the map-outs name F and G, both of which were *already* untrained at this boot, while
+the slot actually lost (B) is not named. Same thing happened on 28 Oct 14:22, where the
+map-out named F after F was already out. The map-out FRU text appears to restate the
+standing map-out list rather than identify the new casualty — so **do not read the map-out
+entries as naming the DIMM just lost.**
+
+### What two instrumented runs establish
+
+1. **Reproducible at will**, ~10 minutes, with the load logged per second.
+2. **Thermal, GPU and PSU excluded.** Tctl max 71.2 °C, 24 °C under limit. GPUs idle at
+   ~17 W, so a few hundred watts against a 1600 W supply. 341 GB of 377 free.
+3. **No precursor.** `ce_count` and `ue_count` were 0 on all 589 samples and the previous
+   boot's journal holds no new `Hardware Error` lines — the 32 present are the kernel
+   replaying the 11:17 BERT record at boot. Unlike 28 Oct there was no corrected-error ramp.
+   The OS gets no warning whatsoever.
+4. **No silent data corruption.** `bad_words 0` across 44,693 full write+verify passes over
+   24 x 512 MB. Every byte written came back correct. The machine is killed outright before
+   a wrong value is ever read — it is not quietly poisoning results.
+
+### Census holds — ninth event
+
+Slot B. Nine DIMM-loss events; every casualty still from **{B, C, F, G}**. A, D, E and H
+have never been lost.
+
+### For PCSpecialist
+
+This is the artefact the case needed. Not a history of unexplained resets, but a
+**documented, repeatable 10-minute procedure** that reproduces the identical fatal
+command/address-bus parity error on their own chosen BIOS at their own chosen default
+memory settings, with thermal, GPU and power all demonstrably slack, and with the machine
+losing another module each time. The reproducer, the per-second log, the pre-run state
+snapshot and the decoded firmware record are all in this repo.

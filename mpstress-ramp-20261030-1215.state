@@ -1,0 +1,39 @@
+# mpstress run ramp-20261030-1215   launched 2026-10-30T12:14:02+00:00
+# args: mb_per_worker=512 secs_per_stage=1800 stages=24 48 96
+
+## uptime
+ 12:14:02 up 52 min,  7 users,  load average: 1.66, 3.44, 3.04
+         system boot  2026-10-30 11:21
+
+## MemTotal
+MemTotal:       395318276 kB
+
+## trained DIMMs (bank / serial / configured speed)
+P0 CHANNEL CA0A997B 6400 MT/s
+P0 CHANNEL A00A9902 6400 MT/s
+P0 CHANNEL 9E0AA2C7 6400 MT/s
+P0 CHANNEL A80A9950 6400 MT/s
+P0 CHANNEL A00AA31B 6400 MT/s
+P0 CHANNEL AB0A997B 6400 MT/s
+
+## BIOS
+1317
+02/03/2026
+
+## EDAC counters
+/sys/devices/system/edac/mc/mc0/ce_count = 0
+/sys/devices/system/edac/mc/mc0/ue_count = 0
+
+## BERT table size (pre-run)
+-r-------- 1 root root 780 Oct 30 11:33 /sys/firmware/acpi/tables/data/BERT
+
+## hardware errors this boot
+count: 32
+
+## Tctl / GPUs
+k10temp-pci-00c3
+Adapter: PCI adapter
+Tctl:         +67.6°C  
+index, power.draw [W], power.limit [W], utilization.gpu [%], temperature.gpu
+0, 16.66 W, 450.00 W, 0 %, 30
+1, 16.67 W, 450.00 W, 0 %, 33
