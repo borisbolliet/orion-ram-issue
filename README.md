@@ -11,6 +11,10 @@ containing a **FATAL DDR5 command/address parity error** in the processor's Unif
 Memory Controller, with the Processor Context Corrupt bit set in `MCA_STATUS`. Some
 resets leave no firmware trace at all and require a manual power-on.
 
+As of 2026-10-30 the fault is **reproducible on demand**: a pure memory load of 24
+processes holding 12 GB resets the machine in under ten minutes, with the CPU 24 °C
+below its thermal limit, both GPUs idle and 341 of 377 GB free. See `stress/`.
+
 Evidence to date says this is **not** a failed memory module: the fatal error has
 appeared on two different controller cards, six of eight controllers have logged
 errors in the same instant, and which channels fail to train changes between boots
@@ -29,6 +33,7 @@ reading. Everything else is raw evidence it refers to.
 | `reply-draft-2.txt` | long-form escalation letter (superseded; see NOTES for the short version actually sent) |
 | `bert_decode.py` | ACPI BERT / CPER parser. `bert_decode.py <file> [n]`, n = entries to print, 0 = all |
 | `mem_decode.py` | decoder for CPER Platform Memory Error sections |
+| `stress/` | **`mpstress`, the on-demand reproducer** — triggers the fault in under 10 min. See [`stress/README.md`](stress/README.md) |
 | `bert-record-*.bin` | raw BERT records as published by the firmware |
 | `bert-decoded-*.txt` | decoded output of the above |
 | `orion-ram-diag-*.txt` | full diagnostic dumps |
